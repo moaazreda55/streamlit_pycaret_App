@@ -42,6 +42,7 @@ def show_eda(df):
     
 # Function to setup classification
 def setup_classification(df, target_col):
+    encode_categorical_column(df, target_col)
     setup(data=df, target=target_col, session_id=123)  
     best_model = compare_models()
     if st.button("Train Models"):        
@@ -60,6 +61,7 @@ def setup_classification(df, target_col):
 
 # Function to setup regression
 def setup_regression(df, target_col):
+    encode_categorical_column(df, target_col)
     setup(data=df, target=target_col, session_id=123) 
     best_model = compare_models()
     if st.button("Train Models"):        
