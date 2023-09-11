@@ -1,4 +1,5 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 from setuptools import setup
 import pycaret 
 import streamlit as st
@@ -21,6 +22,18 @@ def main():
         if st.checkbox("Show EDA"):
             show_eda(df)
 
+        columns_to_drop = st.multiselect("Select columns to drop:", df.columns)
+        for column in df.columns:
+            if column not in columns_to_drop:
+                st.write(f"#### Handling missing values in '{column}':")
+                technique = st.selectbox(
+                    f"What to do with missing values in '{column}'?",
+                    ('most frequent', 'Missing') if df[column].dtype == 'object' else ('mean', 'median', 'mode')
+                )
+
+            handle_missing_values(df, column, technique)
+
+        
         task = st.selectbox("Select Task", ["Classification", "Regression"])
         
         # Model Training and Evaluation
@@ -30,6 +43,25 @@ def main():
             setup_classification(df, target_col)
         else:
             setup_regression(df, target_col)
+            
+        st.write("dtypes:", df.dtypes)   
+        st.write("null values:", df.isnull().sum())
+            
+def handle_missing_values(df, column, technique):
+    if df[column].dtype == 'object':
+        if technique == 'most frequent':
+            df[column].fillna(df[column].mode()[0], inplace=True)
+        else:
+            df[column].fillna('Missing', inplace=True)
+    else:
+        if technique == 'mean':
+            df[column].fillna(df[column].mean(), inplace=True)
+        elif technique == 'median':
+            df[column].fillna(df[column].median(), inplace=True)
+        elif technique == 'mode':
+            df[column].fillna(df[column].mode()[0], inplace=True)  
+
+          
 def encode_categorical_column(df, target_col):
     # Check if the column is of object (string) type or categorical type
     if df[target_col].dtype == 'object' or df[target_col].dtype.name == 'object':
@@ -38,9 +70,11 @@ def encode_categorical_column(df, target_col):
 # Function to show basic EDA
 def show_eda(df):
     st.write("Shape:", df.shape)
+    st.write("dtypes:", df.dtypes)
+    st.write("null values:", df.isnull().sum())
     st.write("Summary:", df.describe())
     
-# Function to setup classification
+#Function to setup classification
 def setup_classification(df, target_col):
     encode_categorical_column(df, target_col)
     setup(data=df, target=target_col, session_id=123)  
@@ -53,9 +87,9 @@ def setup_classification(df, target_col):
     xx=inx.reset_index()
     selected_model = st.selectbox("Select Model for Training", list(xx['index']))
     if st.button(f"Train {selected_model}"):
-        model = create_model(selected_model)
+        
         st.write(f"{selected_model} trained!")
-        evaluate_model(model)        
+                
         evaluation(best_model)
         
 
@@ -71,13 +105,17 @@ def setup_regression(df, target_col):
     xx=inx.reset_index()    
     selected_model = st.selectbox("Select Model for Training",list(xx['index']) )
     if st.button(f"Train {selected_model}"):
-        model = create_model(selected_model)
+       
         st.write(f"{selected_model} trained!")
-        evaluate_model(model)    
+            
         evaluation(best_model)
         
 def evaluation(best_model):
-    st.write("evaluation:", evaluate_model(best_model))        
+      
+    plot_model(best_model)
+    st.pyplot(plt.gcf())
+    plt.clf()
+          
 if __name__ == "__main__":
     main()
     # Go to TERMINAL and run streamlit run pycaret.py
