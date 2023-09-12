@@ -17,12 +17,14 @@ def main():
     if data_upload:
         df = pd.read_csv(data_upload)
         st.dataframe(df)
+        columns_to_drop = st.multiselect("Select columns to drop:", df.columns)
+        drop_coulmn(df,columns_to_drop)
         
         # EDA
         if st.checkbox("Show EDA"):
             show_eda(df)
 
-        columns_to_drop = st.multiselect("Select columns to drop:", df.columns)
+        
         for column in df.columns:
             global technique
             if column not in columns_to_drop:
@@ -48,7 +50,10 @@ def main():
             
         st.write("dtypes:", df.dtypes)   
         st.write("null values:", df.isnull().sum())
-            
+        
+def drop_coulmn(df,columns_to_drop):
+     df.drop(columns=columns_to_drop, axis=1, inplace=True) 
+    
 def handle_missing_values(df, column, technique):
     if df[column].dtype == 'object':
         if technique == 'most frequent':
