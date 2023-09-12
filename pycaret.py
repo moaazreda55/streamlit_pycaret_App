@@ -16,6 +16,7 @@ def main():
     data_upload = st.file_uploader("Upload Dataset (CSV only)", type=["csv"])
     if data_upload:
         df = pd.read_csv(data_upload)
+        technique =['most frequent','Missing','mean','median','mode']
         st.dataframe(df)
         columns_to_drop = st.multiselect("Select columns to drop:", df.columns)
         drop_coulmn(df,columns_to_drop)
@@ -26,7 +27,7 @@ def main():
 
         
         for column in df.columns:
-            global technique
+            
             if column not in columns_to_drop:
                 st.write(f"#### Handling missing values in '{column}':")
                 technique = st.selectbox(
@@ -95,10 +96,10 @@ def setup_classification(df, target_col):
     xx=inx.reset_index()
     selected_model = st.selectbox("Select Model for Training", list(xx['index']))
     if st.button(f"Train {selected_model}"):
-        
         st.write(f"{selected_model} trained!")
-                
-        evaluation(best_model)
+        fig = plot_model(best_model)
+        st.pyplot(fig)        
+       
         
 
 # Function to setup regression
@@ -113,16 +114,15 @@ def setup_regression(df, target_col):
     xx=inx.reset_index()    
     selected_model = st.selectbox("Select Model for Training",list(xx['index']) )
     if st.button(f"Train {selected_model}"):
-       
         st.write(f"{selected_model} trained!")
-            
-        evaluation(best_model)
+        fig = plot_model(best_model)
+        st.pyplot(fig)    
         
-def evaluation(best_model):
+        
+
       
-    plot_model(best_model)
-    st.pyplot(plt.gcf())
-    plt.clf()
+    
+    
           
 if __name__ == "__main__":
     main()
