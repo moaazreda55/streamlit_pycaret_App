@@ -24,6 +24,7 @@ def main():
 
         columns_to_drop = st.multiselect("Select columns to drop:", df.columns)
         for column in df.columns:
+            global technique
             if column not in columns_to_drop:
                 st.write(f"#### Handling missing values in '{column}':")
                 technique = st.selectbox(
@@ -34,15 +35,16 @@ def main():
             handle_missing_values(df, column, technique)
 
         
-        task = st.selectbox("Select Task", ["Classification", "Regression"])
         
         # Model Training and Evaluation
         target_col = st.selectbox("Select Target Column", df.columns)
-        
-        if task == "Classification":
-            setup_classification(df, target_col)
+
+        if df[target_col].dtype == 'object' :
+           setup_classification(df, target_col) 
+           
         else:
             setup_regression(df, target_col)
+        
             
         st.write("dtypes:", df.dtypes)   
         st.write("null values:", df.isnull().sum())
@@ -60,7 +62,8 @@ def handle_missing_values(df, column, technique):
             df[column].fillna(df[column].median(), inplace=True)
         elif technique == 'mode':
             df[column].fillna(df[column].mode()[0], inplace=True)  
-
+        else :
+            pass 
           
 def encode_categorical_column(df, target_col):
     # Check if the column is of object (string) type or categorical type
