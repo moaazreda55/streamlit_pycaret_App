@@ -48,7 +48,8 @@ def main():
         else:
             setup_regression(df, target_col)
         
-            
+        st.write("final dataset:")   
+        st.dataframe(df)
         st.write("dtypes:", df.dtypes)   
         st.write("null values:", df.isnull().sum())
         
